@@ -49,7 +49,7 @@ Medium Light (1,000 lux): 2 out of 4 LEDs are lit
 To provide voltage to the phototransistor and start measuring light intensity a switch must be pressed down.
 
 ## Schematics
-![Plant Light Meter Schematic](./plant_light_meter_schematic.png)
+![Plant Light Meter Schematic](plant_light_meter_schematic.png)  
 Source: https://schematics.io/draw
     
 ## Resources
