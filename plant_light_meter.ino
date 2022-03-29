@@ -39,32 +39,36 @@ void loop() {
 
   Serial.print("Sensor Value: ");
   Serial.print(lightSensorValue);
-  Serial.println(" Lux");
 
   if(lightSensorValue == 0){
     digitalWrite(lowLightLEDPin, LOW);
     digitalWrite(mediumLightLEDPin, LOW);
     digitalWrite(indirectLightLEDPin, LOW);
     digitalWrite(directLightLEDPin, LOW);
+    Serial.println(", light_type: no_light");
   } else if(lightSensorValue < 500) {
     digitalWrite(lowLightLEDPin, HIGH);
     digitalWrite(mediumLightLEDPin, LOW);
     digitalWrite(indirectLightLEDPin, LOW);
     digitalWrite(directLightLEDPin, LOW);
+    Serial.println(", light_type: low_light");
   } else if(lightSensorValue >= 500 && lightSensorValue < 1000) {
     digitalWrite(lowLightLEDPin, HIGH);
     digitalWrite(mediumLightLEDPin, HIGH);
     digitalWrite(indirectLightLEDPin, LOW);
     digitalWrite(directLightLEDPin, LOW);
+    Serial.println(", light_type: medium_light");
   } else if(lightSensorValue >= 1000 && lightSensorValue < 2000) {
     digitalWrite(lowLightLEDPin, HIGH);
     digitalWrite(mediumLightLEDPin, HIGH);
     digitalWrite(indirectLightLEDPin, HIGH);
     digitalWrite(directLightLEDPin, LOW);
+    Serial.println(", light_type: indirect_light");
   } else if(lightSensorValue >= 2000) {
     digitalWrite(lowLightLEDPin, HIGH);
     digitalWrite(mediumLightLEDPin, HIGH);
     digitalWrite(indirectLightLEDPin, HIGH);
     digitalWrite(directLightLEDPin, HIGH);
+    Serial.println(", light_type: direct_light");
   }
 }
