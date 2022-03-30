@@ -1,42 +1,45 @@
-import tempfile
-
 import boto3 as boto3
 import serial.serialutil
 
 from datetime import datetime
+
+from boto3.dynamodb.conditions import Attr
 from serial import Serial
 
+# The name of your DynamoDB Table
+DYNAMO_TABLE = 'gardener_bot_light_sensor_data'
 # The port which your arduino is using to write to serial monitor
 ARDUINO_PORT = '/dev/ttyACM0'
-S3_BUCKET = 'gardener-bot-sensor-data-bucket'
 
 if __name__ == "__main__":
+    # DynamoDB
+    dynamo = boto3.resource('dynamodb')
+    table = dynamo.Table(DYNAMO_TABLE)
+    print(table.creation_date_time)
+
     # Set up serial port from your Arduino
     light_meter_ser = Serial(ARDUINO_PORT, timeout=1)
-
-    # A temporary file we can upload to s3
-    tmp_file = tempfile.NamedTemporaryFile()
-    # The s3 file name
-    date = datetime.now()
-    s3_file_name = f"{date.strftime('%Y-%m-%d_%H%M')}_light_sensor_data"
 
     # A variable to keep track of data flowing through serial port
     data_exists = True
 
-    # While serial port is sending data, write to a temp file
-    # TODO: Maybe limit the size of the temp file before it gets uploaded?
+    # While serial port is sending data, write to DB
     while data_exists:
         try:
             data = light_meter_ser.readline()
-            tmp_file.write(data)
+            try:
+                data = data.decode('utf8')
+            except:
+                print(f"Could not decode byte {data}")
+                data = str(data)
+            table.put_item(
+                Item={
+                    'timestamp': datetime.now().strftime('%Y-%m-%d-%H%M%S.%f'),
+                    'data': data
+                }
+            )
+            response = table.scan(FilterExpression=Attr('data').eq(data))
+            print(response['Items'])
         except serial.serialutil.SerialException:
             print("No more data is being sent!")
             data_exists = False
-
-    # Upload temp file to S3
-    s3 = boto3.client('s3')
-    s3.upload_file(tmp_file.name, S3_BUCKET, s3_file_name)
-    print(f"Temp file {tmp_file.name} was written to {S3_BUCKET}/{s3_file_name}")
-
-    # Close and delete temporary file
-    tmp_file.close()
